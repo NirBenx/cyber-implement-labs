@@ -1,0 +1,5 @@
+nc:red
+ncat:red
+socat:red
+nmap:orange
+tcpdump:orange

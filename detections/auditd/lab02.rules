@@ -1,0 +1,4 @@
+# Sanitized reconstruction; validate architecture-specific syscall support before use.
+-a always,exit -F arch=b64 -S execve -k audit-wazuh-c
+-a always,exit -F arch=b64 -S connect -F exe=/usr/bin/nmap -k network-recon
+-a always,exit -F arch=b64 -S connect -F exe=/usr/bin/curl -k lab02-web-beacon

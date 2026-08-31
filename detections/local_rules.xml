@@ -1,0 +1,99 @@
+<!--
+  Sanitized reconstruction from supplied project context.
+  Not a byte-for-byte export of the active Wazuh configuration.
+  Validate with Wazuh tooling before deployment.
+-->
+<group name="lab02,">
+  <rule id="100100" level="10">
+    <match>LAB02_SUSPICIOUS_COMMAND</match>
+    <description>LAB02: Suspicious command marker observed</description>
+    <mitre><id>T1059</id></mitre>
+  </rule>
+
+  <rule id="100101" level="12" frequency="5" timeframe="60" ignore="120">
+    <if_matched_sid>100100</if_matched_sid>
+    <description>LAB02: Repeated suspicious command markers</description>
+    <mitre><id>T1059</id></mitre>
+  </rule>
+
+  <rule id="100110" level="12">
+    <if_sid>80792</if_sid>
+    <list field="audit.command" lookup="match_key_value" check_value="red">etc/lists/suspicious-programs</list>
+    <description>LAB02: High-risk listed tool executed</description>
+    <mitre><id>T1059</id></mitre>
+  </rule>
+
+  <rule id="100111" level="8">
+    <if_sid>80792</if_sid>
+    <list field="audit.command" lookup="match_key_value" check_value="orange">etc/lists/suspicious-programs</list>
+    <description>LAB02: Suspicious network administration tool executed</description>
+  </rule>
+
+  <rule id="100120" level="12">
+    <if_sid>80792</if_sid>
+    <field name="audit.euid">^0$</field>
+    <field name="audit.auid" negate="yes">^(0|4294967295)$</field>
+    <description>LAB02: Command executed as root by a non-root login identity</description>
+    <mitre><id>T1548.003</id></mitre>
+  </rule>
+
+  <rule id="100130" level="12">
+    <if_sid>554</if_sid>
+    <field name="file">^/etc/cron\.d/</field>
+    <description>LAB02: New cron persistence file</description>
+    <mitre><id>T1053.003</id></mitre>
+  </rule>
+
+  <rule id="100131" level="12">
+    <if_sid>550</if_sid>
+    <field name="file">^/etc/cron\.d/</field>
+    <description>LAB02: Modified cron persistence file</description>
+    <mitre><id>T1053.003</id></mitre>
+  </rule>
+
+  <rule id="100140" level="13">
+    <if_sid>80792</if_sid>
+    <field name="audit.command">^(useradd|adduser)$</field>
+    <description>LAB02: Local account creation command</description>
+    <mitre><id>T1136.001</id></mitre>
+  </rule>
+
+  <rule id="100141" level="13">
+    <if_sid>80792</if_sid>
+    <field name="audit.command">^usermod$</field>
+    <description>LAB02: Local account or group modification command</description>
+    <mitre><id>T1098.007</id></mitre>
+  </rule>
+
+  <rule id="100150" level="13">
+    <if_sid>80792</if_sid>
+    <field name="audit.key">^network-recon$</field>
+    <description>LAB02: Nmap network reconnaissance activity</description>
+    <mitre><id>T1046</id></mitre>
+  </rule>
+
+  <rule id="100160" level="5">
+    <if_sid>80792</if_sid>
+    <field name="audit.key">^lab02-web-beacon$</field>
+    <description>LAB02: HTTP connection candidate via curl</description>
+    <mitre><id>T1071.001</id></mitre>
+  </rule>
+
+  <rule id="100161" level="13" frequency="5" timeframe="60" ignore="120">
+    <if_matched_sid>100160</if_matched_sid>
+    <description>LAB02: Repeated HTTP connection behavior</description>
+    <mitre><id>T1071.001</id></mitre>
+  </rule>
+
+  <rule id="100170" level="13"><if_sid>100150</if_sid><description>LAB02 attack-chain stage: reconnaissance</description><group>lab02_attack_chain_stage</group><mitre><id>T1046</id></mitre></rule>
+  <rule id="100171" level="13"><if_sid>100120</if_sid><description>LAB02 attack-chain stage: privilege escalation</description><group>lab02_attack_chain_stage</group><mitre><id>T1548.003</id></mitre></rule>
+  <rule id="100172" level="13"><if_sid>100140</if_sid><description>LAB02 attack-chain stage: account creation</description><group>lab02_attack_chain_stage</group><mitre><id>T1136.001</id></mitre></rule>
+  <rule id="100173" level="13"><if_sid>100130</if_sid><description>LAB02 attack-chain stage: cron persistence</description><group>lab02_attack_chain_stage</group><mitre><id>T1053.003</id></mitre></rule>
+  <rule id="100174" level="13"><if_sid>100161</if_sid><description>LAB02 attack-chain stage: web beaconing</description><group>lab02_attack_chain_stage</group><mitre><id>T1071.001</id></mitre></rule>
+
+  <rule id="100180" level="15" frequency="5" timeframe="900" ignore="600">
+    <if_matched_group>lab02_attack_chain_stage</if_matched_group>
+    <description>LAB02 CRITICAL: Potential multi-stage attack detected on endpoint</description>
+    <mitre><id>T1046</id><id>T1548.003</id><id>T1136.001</id><id>T1053.003</id><id>T1071.001</id></mitre>
+  </rule>
+</group>
